@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Data
+data/
+logs/
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
