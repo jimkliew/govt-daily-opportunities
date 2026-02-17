@@ -2,8 +2,6 @@
 
 **Status:** ✅ COMPLETE  
 **Completed:** 2026-02-15 01:05 AM  
-**Total Build Time:** ~2 hours  
-**Total Cost:** $0.50
 
 ---
 
@@ -141,18 +139,14 @@ Uses `gog` CLI with `your_email@email.com` account. Already configured.
 
 ---
 
-## 💰 Cost Tracking
+## 💰 Effort Tracking
 
 **Development (one-time):**
-- JARVIS (Sonnet 4.5): $0.50
-- Sub-agents (Gemini Flash): $0.00
-- **Total: $0.50**
+- JARVIS (Sonnet 4.5)
 
 **Operational (monthly estimate):**
-- Daily scraping: $0
-- Scoring: $0
-- Email: $0
-- **Total: ~$0-5/month** (only if LLM-enhanced scoring added later)
+- Scoring
+- Email
 
 ---
 
