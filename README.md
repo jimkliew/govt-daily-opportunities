@@ -54,7 +54,7 @@ node scripts/score.js
 ### **3. Email Digest Generator** ✅
 **File:** `scripts/email-digest.js`
 
-- Daily email to jim@sokat.com
+- Daily email to your_email@email.com
 - Professional format with hot/warm leads
 - Pipeline summary & cost tracking
 - Google Drive links
@@ -95,7 +95,7 @@ node scrapers/sam_gov.test.js
 ## 📊 Complete Pipeline
 
 ```
-SAM.gov API → Scraper → JSON → Scorer → Scored JSON → Email → jim@sokat.com
+SAM.gov API → Scraper → JSON → Scorer → Scored JSON → Email → your_email@email.com
 ```
 
 **Manual execution:**
@@ -120,7 +120,7 @@ export SAM_GOV_API_KEY="..."
 ```
 
 ### **Email Configuration:**
-Uses `gog` CLI with `jimkliew@gmail.com` account. Already configured.
+Uses `gog` CLI with `your_email@email.com` account. Already configured.
 
 ---
 
