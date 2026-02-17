@@ -16,10 +16,10 @@ const execAsync = promisify(exec);
 // --- Configuration ---
 const DEFAULT_RECIPIENTS = process.env.EMAIL_RECIPIENTS 
     ? process.env.EMAIL_RECIPIENTS.split(',').map(e => e.trim())
-    : ["jim@sokat.com", "susan@sokat.com"];
-const DEFAULT_ACCOUNT = process.env.EMAIL_ACCOUNT || "jimkliew@gmail.com";
+    : ["your_email@email.com", "your_email@email.com"];
+const DEFAULT_ACCOUNT = process.env.EMAIL_ACCOUNT || "your_email@email.com";
 const DATA_DIR = path.join(__dirname, '../data/scores'); // Path to the scores directory
-const DRIVE_LINK = process.env.DRIVE_LINK || "https://drive.google.com/drive/folders/1v2vujLPX7PBkkc99pOzEpyHBaSY6empu";
+
 
 // --- Helper Functions ---
 
@@ -115,7 +115,7 @@ async function sendEmail(subject, body, recipients) {
  * @returns {Promise<string>} The result of the upload.
  */
 async function saveToGoogleDrive(subject, body, dateString) {
-    const DRIVE_FOLDER_ID = '1v2vujLPX7PBkkc99pOzEpyHBaSY6empu'; // DailyFedBizOps folder
+    const DRIVE_FOLDER_ID = '...'; // DailyFedBizOps folder
     
     // Format: SoKat-Sales-Intelligence-2026-02-15.txt
     const filename = `SoKat-Sales-Intelligence-${dateString}.txt`;
