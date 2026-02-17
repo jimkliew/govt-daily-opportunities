@@ -116,7 +116,7 @@ node scripts/email-digest.js
 
 ### **Environment Variables Required:**
 ```bash
-export SAM_GOV_API_KEY="SAM-6420d2d1-0b11-40dc-ab01-d46265c691a5"
+export SAM_GOV_API_KEY="..."
 ```
 
 ### **Email Configuration:**
