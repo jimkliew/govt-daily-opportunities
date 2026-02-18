@@ -83,7 +83,8 @@ async function sendEmail(subject, body, recipients) {
     
     // Handle both string and array of recipients
     const recipientList = Array.isArray(recipients) ? recipients : [recipients];
-    const toFlags = recipientList.map(r => `--to "${r}"`).join(' ');
+    const toList = recipientList.join(',');
+    const toFlags = `--to "${toList}"`;
     
     const cmd = `gog gmail send ${toFlags} --subject "${subject}" --body-file "${tempPath}" --account "${DEFAULT_ACCOUNT}"`;
     try {
