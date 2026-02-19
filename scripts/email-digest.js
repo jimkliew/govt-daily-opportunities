@@ -16,9 +16,10 @@ const execAsync = promisify(exec);
 // --- Configuration ---
 const DEFAULT_RECIPIENTS = process.env.EMAIL_RECIPIENTS 
     ? process.env.EMAIL_RECIPIENTS.split(',').map(e => e.trim())
-    : ["your_email@email.com", "your_email@email.com"];
-const DEFAULT_ACCOUNT = process.env.EMAIL_ACCOUNT || "your_email@email.com";
+    : ["jim@sokat.com", "susan@sokat.com"];
+const DEFAULT_ACCOUNT = process.env.EMAIL_ACCOUNT || "jimkliew@gmail.com";
 const DATA_DIR = path.join(__dirname, '../data/scores'); // Path to the scores directory
+const DRIVE_LINK = process.env.DRIVE_LINK || "https://drive.google.com/drive/folders/1v2vujLPX7PBkkc99pOzEpyHBaSY6empu";
 
 
 // --- Helper Functions ---
@@ -324,10 +325,12 @@ function generateEmailBody(processedData, reportDateFormatted) {
             const deadline = opp.responseDeadline ? formatDate(new Date(opp.responseDeadline)) : 'N/A';
             const score = opp.score !== undefined && opp.score !== null ? opp.score : 'N/A';
             const url = opp.url || 'No URL provided';
+            const agency = opp.agency || 'Unknown';
             const reasons = Array.isArray(opp.reasons) ? opp.reasons : [];
 
             body += `${index + 1}. ${title}\n`;
             body += `   💰 ${value} | Due: ${deadline} | Fit Score: ${score}/100\n`;
+            body += `   🏛️  Agency: ${agency}\n`;
             reasons.forEach(reason => {
                 body += `   ✅ ${reason}\n`;
             });
@@ -354,6 +357,7 @@ function generateEmailBody(processedData, reportDateFormatted) {
         topOpportunities.slice(0, topCount).forEach((opp, index) => {
             const title = opp.title || 'Untitled Opportunity';
             const naics = Array.isArray(opp.naicsCode) && opp.naicsCode.length > 0 ? opp.naicsCode[0] : 'N/A';
+            const agency = opp.agency || 'Unknown';
             const deadline = opp.responseDeadline ? formatDate(new Date(opp.responseDeadline)) : 'N/A';
             const url = opp.url || 'No URL provided';
             const noticeType = opp.noticeType || '';
@@ -384,6 +388,7 @@ function generateEmailBody(processedData, reportDateFormatted) {
                                   !titleLower.includes(noticeType.toLowerCase());
             
             body += `${index + 1}. ${title}${shouldAddType ? ' - ' + noticeType : ''}\n`;
+            body += `   • Agency: ${agency}\n`;
             body += `   • NAICS: ${naics}\n`;
             body += `   • Due: ${deadline}${daysRemaining !== 'N/A' && daysRemaining !== 'EXPIRED' ? ` (${daysRemaining} remaining)` : (daysRemaining === 'EXPIRED' ? ' (EXPIRED)' : '')}\n`;
             body += `   • Fit Score: ${score}/100\n`;
