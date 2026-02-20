@@ -20,6 +20,7 @@ const DEFAULT_RECIPIENTS = process.env.EMAIL_RECIPIENTS
 const DEFAULT_ACCOUNT = process.env.EMAIL_ACCOUNT || "jimkliew@gmail.com";
 const DATA_DIR = path.join(__dirname, '../data/scores'); // Path to the scores directory
 const DRIVE_LINK = process.env.DRIVE_LINK || "https://drive.google.com/drive/folders/1v2vujLPX7PBkkc99pOzEpyHBaSY6empu";
+const SHEET_ID = "1J9fam5XwLF7Kkyha3uWqzdQTq9nu5BBVYvCMPRlLjDM"; // Dashboard sheet ID
 
 
 // --- Helper Functions ---
@@ -149,6 +150,74 @@ async function saveToGoogleDrive(subject, body, dateString) {
     } catch (error) {
         console.error("Failed to upload to Google Drive:", error.message);
         // Don't throw - email still sent successfully
+        return null;
+    }
+}
+
+/**
+ * Appends new opportunities to Google Sheet dashboard
+ * @param {Array} opportunities - Array of opportunities to append
+ * @param {string} dateString - Date string (YYYY-MM-DD)
+ * @returns {Promise<string>} The result of the append operation
+ */
+async function appendToSheet(opportunities, dateString) {
+    if (!opportunities || opportunities.length === 0) {
+        console.log("No opportunities to append to sheet");
+        return;
+    }
+    
+    // Helper function to calculate days remaining
+    const calculateDaysRemaining = (dueDate) => {
+        if (!dueDate) return 'N/A';
+        try {
+            const due = new Date(dueDate);
+            const now = new Date();
+            const diff = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+            return diff;
+        } catch {
+            return 'N/A';
+        }
+    };
+    
+    // Format rows for sheet
+    const rows = opportunities.map(opp => [
+        dateString,
+        (opp.title || 'N/A').replace(/"/g, '""'), // Escape quotes
+        opp.agency || 'Unknown',
+        opp.naics || 'N/A',
+        opp.value || 'N/A',
+        opp.dueDate || 'N/A',
+        opp.score || 0,
+        opp.category || 'skip',
+        calculateDaysRemaining(opp.dueDate),
+        opp.url || 'N/A'
+    ]);
+    
+    // Write to temp file
+    const tempFile = `/tmp/sheet-append-${Date.now()}.json`;
+    fs.writeFileSync(tempFile, JSON.stringify(rows));
+    
+    // Append to sheet
+    const cmd = `gog sheets append "${SHEET_ID}" "Sheet1!A:J" --values-json "$(cat ${tempFile})" --insert INSERT_ROWS --account ${DEFAULT_ACCOUNT}`;
+    
+    try {
+        const { stdout, stderr } = await execAsync(cmd, {
+            shell: true,
+            maxBuffer: 1024 * 500
+        });
+        if (stderr) {
+            console.warn("Google Sheets append stderr:", stderr);
+        }
+        console.log(`📊 Appended ${rows.length} rows to dashboard`);
+        
+        // Clean up temp file
+        fs.unlinkSync(tempFile);
+        
+        return stdout;
+    } catch (error) {
+        console.error("Failed to append to Google Sheet:", error.message);
+        // Don't throw - email still sent successfully
+        try { fs.unlinkSync(tempFile); } catch (e) {}
         return null;
     }
 }
@@ -452,6 +521,10 @@ async function main() {
             console.log("Sending email...");
             const sendResult = await sendEmail(subject, emailBody, recipients);
             console.log("✅ Email sent successfully:", sendResult);
+            
+            // Append to Google Sheet dashboard
+            console.log("Updating Google Sheet dashboard...");
+            await appendToSheet(opportunities, dateString);
             
             // Save to Google Drive
             console.log("Uploading to Google Drive...");
