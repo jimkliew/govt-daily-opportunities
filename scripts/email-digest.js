@@ -7,6 +7,8 @@
  * @author Your Name
  */
 
+require('dotenv').config();
+
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const path = require('path');
@@ -383,45 +385,16 @@ function generateEmailBody(processedData, reportDateFormatted) {
     const { hotLeads, warmLeads, watchLeads, summary } = processedData;
 
     let body = ''; // Subject is handled separately
-    // Hot Leads Section
-    body += `🔥 HOT LEADS TODAY (${summary.hotCount}):\n\n`;
-    if (hotLeads.length === 0) {
-        body += "   No hot leads identified today.\n\n";
-    } else {
-        hotLeads.forEach((opp, index) => {
-            const title = opp.title || 'Untitled Opportunity';
-            const value = formatCurrency(opp.estimatedValue);
-            const deadline = opp.responseDeadline ? formatDate(new Date(opp.responseDeadline)) : 'N/A';
-            const score = opp.score !== undefined && opp.score !== null ? opp.score : 'N/A';
-            const url = opp.url || 'No URL provided';
-            const agency = opp.agency || 'Unknown';
-            const reasons = Array.isArray(opp.reasons) ? opp.reasons : [];
-
-            body += `${index + 1}. ${title}\n`;
-            body += `   💰 ${value} | Due: ${deadline} | Fit Score: ${score}/100\n`;
-            body += `   🏛️  Agency: ${agency}\n`;
-            reasons.forEach(reason => {
-                body += `   ✅ ${reason}\n`;
-            });
-            body += `   📋 ${url}\n\n`;
-        });
-    }
-
-    // Top Biddable Opportunities Section (Combined Hot + Warm, or fallback to Watch)
-    let topOpportunities = [...hotLeads, ...warmLeads].sort((a, b) => (b.score || 0) - (a.score || 0));
-    let sectionTitle = "BIDDABLE OPPORTUNITIES";
     
-    // If no hot/warm, show top watch opportunities
-    if (topOpportunities.length === 0 && watchLeads.length > 0) {
-        topOpportunities = [...watchLeads].sort((a, b) => (b.score || 0) - (a.score || 0));
-        sectionTitle = "WATCH LIST - LOWER FIT OPPORTUNITIES";
-    }
+    // Sort all opportunities by score (highest first)
+    const allOpportunities = [...hotLeads, ...warmLeads, ...watchLeads];
+    const topOpportunities = allOpportunities.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const topCount = Math.min(10, topOpportunities.length);
     
-    const topCount = Math.min(10, topOpportunities.length); // Show top 10
-    
+    // Top 10 Opportunities Section
     if (topCount > 0) {
         const highestScore = topOpportunities[0].score || 0;
-        body += `\n🎯 TOP ${topCount} ${sectionTitle} (Highest Score: ${highestScore}):\n\n`;
+        body += `🎯 TOP ${topCount} OPPORTUNITIES (Highest Score: ${highestScore}/100):\n\n`;
         
         topOpportunities.slice(0, topCount).forEach((opp, index) => {
             const title = opp.title || 'Untitled Opportunity';
@@ -457,25 +430,23 @@ function generateEmailBody(processedData, reportDateFormatted) {
                                   !titleLower.includes(noticeType.toLowerCase());
             
             body += `${index + 1}. ${title}${shouldAddType ? ' - ' + noticeType : ''}\n`;
+            body += `   • Score: ${score}/100\n`;
             body += `   • Agency: ${agency}\n`;
             body += `   • NAICS: ${naics}\n`;
             body += `   • Due: ${deadline}${daysRemaining !== 'N/A' && daysRemaining !== 'EXPIRED' ? ` (${daysRemaining} remaining)` : (daysRemaining === 'EXPIRED' ? ' (EXPIRED)' : '')}\n`;
-            body += `   • Fit Score: ${score}/100\n`;
             body += `   • ${url}\n\n`;
         });
+    } else {
+        body += `🎯 TOP 10 OPPORTUNITIES:\n\n`;
+        body += "   No opportunities found today.\n\n";
     }
 
     // Pipeline Summary
-    body += `📊 PIPELINE SUMMARY:\n`;
-    body += `- Hot: ${summary.hotCount} | Warm: ${summary.warmCount} | Watch: ${summary.watchCount}\n`;
+    body += `\n📊 PIPELINE SUMMARY:\n`;
+    body += `- Total opportunities: ${allOpportunities.length}\n`;
+    body += `- Average score: ${summary.averageScore.toFixed(1)}/100\n`;
     body += `- Total estimated value: ${formatCurrency(summary.totalEstimatedValue)}\n`;
-    body += `- New opportunities today: ${summary.newOpportunitiesToday}
-- Upcoming deadlines (next 7 days): ${summary.upcomingDeadlines}\n\n`;
-
-    // System Costs
-    body += `💰 SYSTEM COSTS:\n`;
-    body += `- Yesterday: ${formatCurrency(summary.systemCostsYesterday, 2)}\n`;
-    body += `- This week: ${formatCurrency(summary.systemCostsThisWeek, 2)}\n\n`;
+    body += `- Upcoming deadlines (next 7 days): ${summary.upcomingDeadlines}\n\n`;
 
     body += `---\n`;
     body += `📁 View all in Drive: ${DRIVE_LINK}\n`;

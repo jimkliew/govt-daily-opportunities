@@ -18,6 +18,8 @@
  *   SAM_GOV_API_KEY - Required. SAM.gov API key for authentication.
  */
 
+require('dotenv').config();
+
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
