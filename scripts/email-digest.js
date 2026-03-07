@@ -120,7 +120,7 @@ async function sendEmail(subject, body, recipients) {
  * @returns {Promise<string>} The result of the upload.
  */
 async function saveToGoogleDrive(subject, body, dateString) {
-    const DRIVE_FOLDER_ID = '...'; // DailyFedBizOps folder
+    const DRIVE_FOLDER_ID = '1v2vujLPX7PBkkc99pOzEpyHBaSY6empu'; // DailyFedBizOps folder
     
     // Format: SoKat-Sales-Intelligence-2026-02-15.txt
     const filename = `SoKat-Sales-Intelligence-${dateString}.txt`;
